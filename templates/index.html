@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<div class="jumbotron text-center">
+    <h1>Bem-vindo ao Flasky!</h1>
+    <p class="lead">Exemplo com Flask, Bootstrap e Moment.js</p>
+</div>
+
+<div class="text-center">
+    <p><strong>The local date and time is:</strong> {{ moment(current_time).format('LLLL') }}</p>
+    <p><strong>That was:</strong> {{ moment(current_time).fromNow(refresh=True) }}</p>
+</div>
+{% endblock %}
