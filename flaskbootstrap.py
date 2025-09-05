@@ -22,6 +22,16 @@ def user(name):
 def page_not_found(e):
     return render_template("404.html"), 404
 
+# Identificação
+@app.route("/user/<name>/<institution>/<course>")
+def identify(name, institution, course):
+    return render_template("identify.html", name=name, institution=institution, course=course)
+
+# Contexto Requisição
+@app.route("/request/<name>")
+def request_context(name):
+    return render_template("request.html", name=name)
+
 # Executar
 if __name__ == '__main__':
     app.run(debug=True)
