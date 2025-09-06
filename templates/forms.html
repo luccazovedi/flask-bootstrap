@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Formulário{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1 class="mb-4">Bem-vindo, {{ nome }}!</h1>
+
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+      {{ form.nome.label(class="form-label") }}
+      {{ form.nome(class="form-control", placeholder="Digite seu nome") }}
+      {% for error in form.nome.errors %}
+        <div class="text-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    {{ form.submit(class="btn btn-primary") }}
+  </form>
+</div>
+{% endblock %}
+
+

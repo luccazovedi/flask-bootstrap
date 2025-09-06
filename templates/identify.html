@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+    <h1>Identificação do Usuário</h1>
+    <p>Nome: {{ name }}</p>
+    <p>Instituição: {{ institution }}</p>
+    <p>Curso: {{ course }}</p>
+    <a href="{{ url_for('index') }}">Voltar para a Página Inicial</a>
+{% endblock %}
