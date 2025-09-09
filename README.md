@@ -24,14 +24,23 @@ O projeto pode ser rodado **localmente** ou feito deploy no **PythonAnywhere**.
 ## 📂 Estrutura do Projeto
 bootstrap/
 │── flaskbootstrap.py # Arquivo principal Flask
+
 │── static/ # Arquivos estáticos (favicon, CSS, JS, imagens)
+
 │── templates/ # Templates HTML
+
 │ ├── base.html # Template base com navbar e Bootstrap
+
 │ ├── index.html # Página inicial
+
 │ ├── user.html # Página personalizada do usuário
+
 │ ├── forms.html # Formulário com validação
+
 │ ├── request.html # Informações da requisição
+
 │ └── 404.html # Página de erro 404
+
 └── README.md
 
 
