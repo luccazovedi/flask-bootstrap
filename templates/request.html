@@ -6,5 +6,5 @@
     <p>URL: {{ request.url }}</p>
     <p>IP: {{ request.remote_addr }}</p>
     <p>Navegador: {{ request.user_agent }}</p>
-    <a href="{{ url_for('index') }}">Voltar para a Página Inicial</a>
+    <a href="{{ url_for('index') }}" class="btn btn-link">Voltar para a Página Inicial</a>
 {% endblock %}

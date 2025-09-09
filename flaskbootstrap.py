@@ -10,7 +10,7 @@ app = Flask(__name__)
 bootstrap = Bootstrap(app)
 moment = Moment(app)
 
-app.config['SECRET_KEY'] = 'sua_chave_secreta_aqui'
+app.config['SECRET_KEY'] = 'zovedi123'
 
 @app.route("/")
 def index():
@@ -24,14 +24,17 @@ def user(name):
 def page_not_found(e):
     return render_template("404.html"), 404
 
+# Identificação
 @app.route("/user/<name>/<institution>/<course>")
 def identify(name, institution, course):
     return render_template("identify.html", name=name, institution=institution, course=course)
 
+# Contexto Requisição
 @app.route("/request/<name>")
 def request_context(name):
     return render_template("request.html", name=name)
 
+# Formulário
 class NomeForm(FlaskForm):
     nome = StringField('Nome', validators=[DataRequired()])
     submit = SubmitField('Enviar')
@@ -44,5 +47,6 @@ def forms():
         nome = form.nome.data
     return render_template('forms.html', form=form, nome=nome)
 
+# Executar
 if __name__ == '__main__':
     app.run(debug=True)

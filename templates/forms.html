@@ -17,8 +17,9 @@
       {% endfor %}
     </div>
 
-    {{ form.submit(class="btn btn-primary") }}
+    {{ form.submit(class="btn btn-success", style="margin-top: 15px;") }}
   </form>
+  <a href="{{ url_for('index') }}" class="btn btn-link">Voltar para a Página Inicial</a>
 </div>
 {% endblock %}
 
