@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1 class="mb-4">Formulário de Login</h1>
+
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+
+    <!-- Campo Usuário ou E-mail -->
+    <div class="mb-3">
+      {{ form.usuario.label(class="form-label") }}
+      {{ form.usuario(class="form-control", placeholder="Digite seu usuário ou e-mail") }}
+      {% for error in form.usuario.errors %}
+        <div class="text-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <!-- Campo Senha -->
+    <div class="mb-5">
+      {{ form.senha.label(class="form-label") }}
+      {{ form.senha(class="form-control", placeholder="Digite sua senha") }}
+      {% for error in form.senha.errors %}
+        <div class="text-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <!-- Botão de Envio -->
+    {{ form.submit(class="btn btn-primary") }}
+  </form>
+  <a href="{{ url_for('index') }}" class="btn btn-link mt-5">Voltar para a Página Inicial</a>
+</div>
+{% endblock %}
