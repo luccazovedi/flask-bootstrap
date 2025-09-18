@@ -15,6 +15,7 @@ Funcionalidades principais:
 - Página de usuário personalizada (`/user/<nome>`)
 - Página de identificação (`/user/<nome>/<ra>/<instituicao>`)
 - Página de formulário com validação (`Flask-WTF`)
+- Página de Login (`/login`)
 - Página 404 personalizada para rotas inexistentes
 - Layout responsivo com **Bootstrap**
 
@@ -24,16 +25,26 @@ O projeto pode ser rodado **localmente** ou feito deploy no **PythonAnywhere**.
 ## 📂 Estrutura do Projeto
 bootstrap/
 │── flaskbootstrap.py # Arquivo principal Flask
-│── static/ # Arquivos estáticos (favicon, CSS, JS, imagens)
-│── templates/ # Templates HTML
-│ ├── base.html # Template base com navbar e Bootstrap
-│ ├── index.html # Página inicial
-│ ├── user.html # Página personalizada do usuário
-│ ├── forms.html # Formulário com validação
-│ ├── request.html # Informações da requisição
-│ └── 404.html # Página de erro 404
-└── README.md
 
+│── static/ # Arquivos estáticos (favicon, CSS, JS, imagens)
+
+│── templates/ # Templates HTML
+
+│ ├── base.html # Template base com navbar e Bootstrap
+
+│ ├── index.html # Página inicial
+
+│ ├── user.html # Página personalizada do usuário
+
+│ ├── forms.html # Formulário
+
+│ ├── request.html # Informações da requisição
+
+│ └── 404.html # Página de erro 404
+
+│ └── login.hmtl # Login
+
+└── README.md
 
 ---
 
@@ -43,7 +54,7 @@ bootstrap/
 - Flask-Bootstrap
 - Flask-WTF
 - Flask-Moment
--
+
 Instalação recomendada via **virtualenv**:
 
 ```bash
