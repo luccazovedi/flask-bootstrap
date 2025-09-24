@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request
 from flask_wtf import FlaskForm
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
@@ -77,6 +77,23 @@ def login():
 @app.route("/loginResponse/<usuario>")
 def loginResponse(usuario):
     return render_template('loginResponse.html', usuario=usuario)
+
+@app.route("/listausuario", methods=["GET", "POST"])
+def listausuario():
+    nome = None
+    if request.method == "POST":
+        nome = request.form.get("nome")
+        if nome:
+            # usamos a lista global 'usuarios'
+            usuarios.append({"nome": nome, "funcao": "User"})
+    return render_template("listausuario.html", nome=nome, usuarios=usuarios)
+
+# Lista global de usuários
+usuarios = [
+    {"nome": "Lucca", "funcao": "Administrator"},
+    {"nome": "Zovedi", "funcao": "User"},
+]
+
 
 # Executar
 if __name__ == '__main__':
