@@ -78,22 +78,30 @@ def login():
 def loginResponse(usuario):
     return render_template('loginResponse.html', usuario=usuario)
 
+usuarios = [
+    {"nome": "Lucca", "funcao": "Administrador"},
+    {"nome": "Zovedi", "funcao": "User"},
+    {"nome": "Lucca Zovedi", "funcao": "Moderador"},
+]
+
 @app.route("/listausuario", methods=["GET", "POST"])
 def listausuario():
     nome = None
+    funcao = None
+
     if request.method == "POST":
         nome = request.form.get("nome")
-        if nome:
-            # usamos a lista global 'usuarios'
-            usuarios.append({"nome": nome, "funcao": "User"})
-    return render_template("listausuario.html", nome=nome, usuarios=usuarios)
+        funcao = request.form.get("funcao")
 
-# Lista global de usuários
-usuarios = [
-    {"nome": "Lucca", "funcao": "Administrator"},
-    {"nome": "Zovedi", "funcao": "User"},
-]
+        if nome and funcao:
+            usuarios.append({"nome": nome, "funcao": funcao})
 
+    return render_template(
+        "listausuario.html",
+        nome=nome,
+        funcao=funcao,
+        usuarios=usuarios
+    )
 
 # Executar
 if __name__ == '__main__':

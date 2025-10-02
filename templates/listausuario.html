@@ -3,32 +3,98 @@
 {% block title %}Lista Usuários{% endblock %}
 
 {% block content %}
-    <div class="container mt-5">
+<div class="container mt-5">
     <h1>Olá, {% if nome %}{{ nome }}{% else %}Stranger{% endif %}!</h1>
 
-    <form method="POST">
-        <input type="text" name="nome" placeholder="Digite seu nome">
-        <button type="submit">Cadastrar</button>
+    <form method="POST" class="mb-4">
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <input type="text" id="nome" class="form-control" name="nome" placeholder="Digite seu nome" required>
+        </div>
+    
+        <div class="mb-3">
+            <label for="funcao" class="form-label">Função</label>
+            <select id="funcao" name="funcao" class="form-control" required>
+                <option value="">Selecione a função</option>
+                <option value="Administrador">Administrador</option>
+                <option value="Moderador">Moderador</option>
+                <option value="User">User</option>
+            </select>
+        </div>
+    
+        <button type="submit" class="btn btn-primary mt-3">Cadastrar</button>
     </form>
 
     {% if nome %}
-        <p style="color:green;">Usuário {{ nome }} adicionado com sucesso!</p>
+        <div class="alert alert-success">
+            Usuário <strong>{{ nome }}</strong> adicionado como <strong>{{ funcao }}</strong> com sucesso!
+        </div>
     {% endif %}
 
-    <h2>Relação de usuários cadastrados</h2>
-    <table border="1">
-        <tr>
-            <th>Nome do usuário</th>
-            <th>Função</th>
-        </tr>
-        {% for u in usuarios %}
-        <tr>
-            <td>{{ u.nome }}</td>
-            <td>{{ u.funcao }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    </div>
-  <a href="{{ url_for('index') }}" class="btn btn-link">Voltar para a Página Inicial</a>
+    <h2 class="mt-4">Usuários por Funções</h2>
+    <table class="table table-bordered mt-3">
+        <!-- Administradores -->
+        <thead class="table-primary">
+            <tr><th colspan="2">Administradores ({{ usuarios | selectattr('funcao', 'equalto', 'Administrador') | list | length }})</th></tr>
+            <tr><th>Nome</th><th>Função</th></tr>
+        </thead>
+        <tbody>
+            {% for u in usuarios if u.funcao == "Administrador" %}
+            <tr><td>{{ u.nome }}</td><td>{{ u.funcao }}</td></tr>
+            {% else %}
+            <tr><td colspan="2"><i>Nenhum administrador cadastrado</i></td></tr>
+            {% endfor %}
+        </tbody>
 
+        <!-- Moderadores -->
+        <thead class="table-warning">
+            <tr><th colspan="2">Moderadores ({{ usuarios | selectattr('funcao', 'equalto', 'Moderador') | list | length }})</th></tr>
+            <tr><th>Nome</th><th>Função</th></tr>
+        </thead>
+        <tbody>
+            {% for u in usuarios if u.funcao == "Moderador" %}
+            <tr><td>{{ u.nome }}</td><td>{{ u.funcao }}</td></tr>
+            {% else %}
+            <tr><td colspan="2"><i>Nenhum moderador cadastrado</i></td></tr>
+            {% endfor %}
+        </tbody>
+
+        <!-- Usuários -->
+        <thead class="table-success">
+            <tr><th colspan="2">Usuários ({{ usuarios | selectattr('funcao', 'equalto', 'User') | list | length }})</th></tr>
+            <tr><th>Nome</th><th>Função</th></tr>
+        </thead>
+        <tbody>
+            {% for u in usuarios if u.funcao == "User" %}
+            <tr><td>{{ u.nome }}</td><td>{{ u.funcao }}</td></tr>
+            {% else %}
+            <tr><td colspan="2"><i>Nenhum usuário cadastrado</i></td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h2 class="mt-5">Todos os Usuários</h2>
+    <table class="table table-bordered mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Função</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in usuarios %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ u.nome }}</td>
+                <td>{{ u.funcao }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3"><i>Nenhum usuário cadastrado</i></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
 {% endblock %}
