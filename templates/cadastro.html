@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<div class="container min-vh-100 d-flex align-items-center justify-content-center">
+  <div class="row w-100 justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+
+      <!-- Mensagens flash -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-4">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% endwith %}
+
+      <div class="card shadow-sm rounded-3">
+        <div class="card-body p-4">
+
+          <h3 class="card-title text-center mb-4">Cadastrar Usuário</h3>
+
+          <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+              {{ form.prontuario.label(class="form-label") }}
+              {{ form.prontuario(class="form-control", placeholder="Digite o prontuário") }}
+              {% if form.prontuario.errors %}
+                <div class="form-text text-danger">
+                  {{ form.prontuario.errors[0] }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.nome.label(class="form-label") }}
+              {{ form.nome(class="form-control", placeholder="Nome completo") }}
+              {% if form.nome.errors %}
+                <div class="form-text text-danger">
+                  {{ form.nome.errors[0] }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.usuario.label(class="form-label") }}
+              {{ form.usuario(class="form-control", placeholder="Nome de usuário") }}
+              {% if form.usuario.errors %}
+                <div class="form-text text-danger">
+                  {{ form.usuario.errors[0] }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.email.label(class="form-label") }}
+              {{ form.email(class="form-control", placeholder="Seu e-mail") }}
+              {% if form.email.errors %}
+                <div class="form-text text-danger">
+                  {{ form.email.errors[0] }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="d-grid mt-4">
+              {{ form.submit(class="btn btn-primary") }}
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

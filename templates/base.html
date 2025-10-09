@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block navbar %}
-<div class="navbar navbar-inverse" role="navigation">
+<nav class="navbar navbar-inverse" role="navigation">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -25,7 +25,7 @@
                 <li><a href="/">Início</a></li>
                 <li><a href="/rotainexistente">Erro 404</a></li>
 
-                <!-- Dropdown -->
+                <!-- Dropdown Usuário -->
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                         Usuário <span class="caret"></span>
@@ -40,15 +40,28 @@
                 <li><a href="/forms">Formulário</a></li>
                 <li><a href="/login">Login</a></li>
                 <li><a href="/listausuario">Banco de Dados</a></li>
+                <li><a href="/cadastro">E-mail</a></li>
             </ul>
         </div>
     </div>
-</div>
+</nav>
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container mt-4">
     {% block page_content %}{% endblock %}
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 </div>
 {% endblock %}
 
