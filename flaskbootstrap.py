@@ -15,8 +15,6 @@ bootstrap = Bootstrap(app)
 moment = Moment(app)
 load_dotenv()
 
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "@996262502LZ")
-
 # Configurações do Mailgun
 MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
 MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
