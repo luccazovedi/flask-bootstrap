@@ -5,6 +5,7 @@ from datetime import datetime
 from wtforms import StringField, SubmitField, PasswordField, SelectField
 from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
+from dotenv import load_dotenv
 import os
 import requests
 
@@ -12,12 +13,13 @@ import requests
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
 moment = Moment(app)
+load_dotenv()
 
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "@996262502LZ")
 
 # Configurações do Mailgun
-MAILGUN_API_KEY = "7e6cc6f542d61b0e0224ec1030e551ec-556e0aa9-d51f8ecc"
-MAILGUN_DOMAIN = "sandbox570ad6ce4c1c4e308d0bdc7b8eff401a.mailgun.org"
+MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
+MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
 MAILGUN_BASE_URL = f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages"
 
 # ---------- ENVIO DE E-MAIL ----------
