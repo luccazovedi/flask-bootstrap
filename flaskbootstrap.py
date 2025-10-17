@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from datetime import datetime
-from wtforms import StringField, SubmitField, PasswordField, SelectField
+from wtforms import StringField, SubmitField, PasswordField, SelectField, BooleanField
 from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 from dotenv import load_dotenv
@@ -14,58 +14,35 @@ app = Flask(__name__)
 bootstrap = Bootstrap(app)
 moment = Moment(app)
 load_dotenv()
+app.secret_key = "chave-secreta"
 
 # Configurações do Mailgun
 MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
 MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
-MAILGUN_BASE_URL = f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages"
-
+MAILGUN_BASE_URL = "https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages"
+MAILGUN_EMAIL = "postmaster@{MAILGUN_DOMAIN}"
 # ---------- ENVIO DE E-MAIL ----------
-def send_user_registration_email(prontuario, nome, usuario, email_institucional):
-    if not MAILGUN_API_KEY or not MAILGUN_DOMAIN:
-        app.logger.error("MAILGUN_API_KEY ou MAILGUN_DOMAIN não configurados.")
-        return False
-
-    assunto = "Novo usuário cadastrado - Flask Aulas Web"
-    corpo = f"""
-Novo aluno cadastrado no sistema Flask Aulas Web:
-
-📘 Prontuário: {prontuario}
-👤 Nome: {nome}
-💻 Usuário: {usuario}
-📧 E-mail: {email_institucional}
-"""
-    destinatarios = f"flaskaulasweb@zohomail.com, luccazovedi@gmail.com"
-
+def enviar_email_mailgun(destinatario, assunto, corpo):
     try:
-        r = requests.post(
-            MAILGUN_BASE_URL,
+        response = requests.post(
+            f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
             auth=("api", MAILGUN_API_KEY),
             data={
-                "from": f"Flask Aulas Web <postmaster@{MAILGUN_DOMAIN}>",
-                "to": destinatarios,
+                "from": f"Aplicação Flask Lucca Zovedi <{MAILGUN_EMAIL}>",
+                "to": [destinatario],
                 "subject": assunto,
-                "text": corpo
+                "text": corpo,
             },
-            timeout=10
         )
-        if r.status_code == 200 or r.status_code == 201:
-            app.logger.info(f"E-mail enviado com sucesso para {destinatarios}")
-            return True
-        else:
-            app.logger.error(f"Erro Mailgun ({r.status_code}): {r.text}")
-            return False
+        print("Status:", response.status_code)
+        print("Resposta:", response.text)
+        return response
     except Exception as e:
-        app.logger.error(f"Falha ao enviar e-mail: {e}")
-        return False
-
-
+        print("Erro ao enviar e-mail:", e)
 # ---------- FORMULÁRIOS ----------
 class CadastroForm(FlaskForm):
-    prontuario = StringField("Prontuário", validators=[DataRequired()])
-    nome = StringField("Nome", validators=[DataRequired()])
-    usuario = StringField("Usuário", validators=[DataRequired()])
-    email = StringField("E-mail institucional", validators=[DataRequired()])
+    nome = StringField("Nome do Usuário", validators=[DataRequired()])
+    enviar_email = BooleanField("Enviar e-mail para flaskaulasweb@zohomail.com")
     submit = SubmitField("Cadastrar")
 
 class NomeForm(FlaskForm):
@@ -161,23 +138,55 @@ def listausuario():
     )
 
 # Cadastro
+usuarios_cadastrados = [
+    {"nome": "Lucca", "funcao": "Administrador"}
+]
+
 @app.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
     form = CadastroForm()
+    nome_usuario = None
+    mensagem_extra = None
+
     if form.validate_on_submit():
-        sucesso = send_user_registration_email(
-            form.prontuario.data.strip(),
-            form.nome.data.strip(),
-            form.usuario.data.strip(),
-            form.email.data.strip()
-        )
-        flash(
-            "✅ Usuário cadastrado e e-mail enviado com sucesso!" if sucesso
-            else "⚠️ Usuário cadastrado, mas falha no envio de e-mail.",
-            "success" if sucesso else "warning"
-        )
-        return redirect(url_for("cadastro"))
-    return render_template("cadastro.html", form=form)
+        nome_usuario = form.nome.data.strip()
+        funcao = "Administrador" if nome_usuario.lower() == "lucca" else "User"
+
+        # Adiciona usuário
+        usuarios_cadastrados.append({"nome": nome_usuario, "funcao": funcao})
+
+        # Flash temporário de boas-vindas
+        flash(f"Olá, {nome_usuario}!\nCadastro realizado com sucesso!", "success")
+
+        # Se marcar envio de e-mail
+        if form.enviar_email.data:
+            corpo_email = f"""Prontuário: PT3036463
+Nome do aluno: Lucca Zovedi
+Usuário cadastrado: {nome_usuario}"""
+            resposta = enviar_email_mailgun(
+                destinatario="flaskaulasweb@zohomail.com",
+                assunto="Novo usuário cadastrado - Flask Aulas Web",
+                corpo=corpo_email
+            )
+            if resposta.status_code == 200:
+                # Mensagem fixa exibida no HTML
+                mensagem_extra = "Prazer em conhecê-lo!\n\nE-mail enviado para o Administrador do sistema, notificando o cadastro de um novo usuário."
+                flash("✅ E-mail enviado com sucesso!", "info")
+            else:
+                flash(f"❌ Falha ao enviar e-mail ({resposta.status_code})", "danger")
+
+        # Limpar formulário
+        form.nome.data = ""
+        form.enviar_email.data = False
+
+    return render_template(
+        "cadastro.html",
+        form=form,
+        usuarios=usuarios_cadastrados,
+        nome_envio=nome_usuario,
+        mensagem_extra=mensagem_extra
+    )
+
 
 # ---------- EXECUÇÃO ----------
 if __name__ == '__main__':
