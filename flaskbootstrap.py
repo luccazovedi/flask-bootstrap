@@ -137,10 +137,11 @@ def listausuario():
         usuarios=usuarios
     )
 
-# Cadastro
+# Usuários e histórico de e-mails
 usuarios_cadastrados = [
     {"nome": "Lucca", "funcao": "Administrador"}
 ]
+emails_enviados = []
 
 @app.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
@@ -150,30 +151,32 @@ def cadastro():
 
     if form.validate_on_submit():
         nome_usuario = form.nome.data.strip()
-        funcao = "Administrador" if nome_usuario.lower() == "lucca" else "User"
+        funcao = "User"
 
         # Adiciona usuário
         usuarios_cadastrados.append({"nome": nome_usuario, "funcao": funcao})
 
-        # Flash temporário de boas-vindas
-        flash(f"Olá, {nome_usuario}!\nCadastro realizado com sucesso!", "success")
+        # Sempre inclui o e-mail do aluno
+        destinatarios = [f"lucca.z@aluno.ifsp.edu.br"]
 
-        # Se marcar envio de e-mail
+        # Se o checkbox estiver marcado, adiciona o e-mail do administrador
         if form.enviar_email.data:
-            corpo_email = f"""Prontuário: PT3036463
-Nome do aluno: Lucca Zovedi
-Usuário cadastrado: {nome_usuario}"""
-            resposta = enviar_email_mailgun(
-                destinatario="flaskaulasweb@zohomail.com",
-                assunto="Novo usuário cadastrado - Flask Aulas Web",
-                corpo=corpo_email
-            )
-            if resposta.status_code == 200:
-                # Mensagem fixa exibida no HTML
-                mensagem_extra = "Prazer em conhecê-lo!\n\nE-mail enviado para o Administrador do sistema, notificando o cadastro de um novo usuário."
-                flash("✅ E-mail enviado com sucesso!", "info")
-            else:
-                flash(f"❌ Falha ao enviar e-mail ({resposta.status_code})", "danger")
+            destinatarios.append("flaskaulasweb@zohomail.com")
+
+        assunto = f"[Flasky] Novo usuário: {nome_usuario}"
+        texto = f"Novo usuário cadastrado: {nome_usuario}"
+
+        # Salva no histórico de e-mails
+        emails_enviados.append({
+            "de": nome_usuario,
+            "para": ", ".join(destinatarios),
+            "assunto": assunto,
+            "texto": texto,
+            "data_hora": datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        })
+
+        # Mensagem única de sucesso
+        flash("Cadastro realizado com sucesso!", "success")
 
         # Limpar formulário
         form.nome.data = ""
@@ -187,6 +190,9 @@ Usuário cadastrado: {nome_usuario}"""
         mensagem_extra=mensagem_extra
     )
 
+@app.route("/emailsEnviados")
+def emails_enviados_page():
+    return render_template("emailsEnviados.html", emails=emails_enviados)
 
 # ---------- EXECUÇÃO ----------
 if __name__ == '__main__':

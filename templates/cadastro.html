@@ -5,13 +5,6 @@
     <!-- H1 dinâmico -->
     <h1>Olá, <span id="nomeTitulo">{{ nome_envio or 'Stranger' }}</span>!</h1>
 
-    <!-- Mensagem fixa após envio -->
-    {% if mensagem_extra %}
-    <p id="mensagemExtra">{{ mensagem_extra|replace('\n','<br>')|safe }}</p>
-    {% else %}
-    <p id="mensagemExtra" style="display:none;"></p>
-    {% endif %}
-
     <!-- Formulário -->
     <form id="formCadastro" method="POST" class="mb-2">
         {{ form.hidden_tag() }}
@@ -33,7 +26,6 @@
           {% for category, message in messages %}
             <div class="alert alert-{{ category }} alert-dismissible" role="alert">
               {{ message|replace('\n','<br>')|safe }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
             </div>
           {% endfor %}
         </div>
@@ -66,20 +58,13 @@
 document.addEventListener('DOMContentLoaded', function () {
     const nomeTitulo = document.getElementById('nomeTitulo');
     const inputNome = document.getElementById('{{ form.nome.id }}');
-    const mensagemExtra = document.getElementById('mensagemExtra');
 
     // Atualiza H1 enquanto digita
     inputNome.addEventListener('input', function() {
         nomeTitulo.textContent = inputNome.value.trim() || 'Stranger';
-        mensagemExtra.style.display = 'none'; // esconde mensagem fixa enquanto digita
     });
 
-    // Mostra mensagem fixa se houver
-    if(mensagemExtra.textContent.trim() !== '') {
-        mensagemExtra.style.display = 'block';
-    }
-
-    // Fade-out dos flashes após 10 segundos
+    // Fade-out dos flashes após 3 segundos
     setTimeout(() => {
         const alerts = document.querySelectorAll('.alert');
         alerts.forEach(alert => {
@@ -87,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
             alert.classList.add('fade');
             setTimeout(() => alert.remove(), 500);
         });
-    }, 10000);
+    }, 3000);
 });
 </script>
 {% endblock %}
