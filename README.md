@@ -16,7 +16,9 @@ Funcionalidades principais:
 - Página de identificação (`/user/<nome>/<ra>/<instituicao>`)
 - Página de formulário com validação (`Flask-WTF`)
 - Página de Login (`/login`)
-- Página 404 personalizada para rotas inexistentes
+- Página de Cadastro de Usuário com Funções (`/listausuario`)
+- Página 404 personalizada para rotas inexistentes (`/404`)
+- Página de Cadastro e Lista de E-mail com envio automático (`/cadastro e /emailsEnviados`)
 - Layout responsivo com **Bootstrap**
 
 O projeto pode ser rodado **localmente** ou feito deploy no **PythonAnywhere**.
@@ -42,7 +44,11 @@ bootstrap/
 
 │ └── 404.html # Página de erro 404
 
-│ └── login.hmtl # Login
+│ └── login.hmtl # Login]
+
+│ └── cadastro.html #E-mail
+
+│ └── listausuario.html #Banco de Dados
 
 └── README.md
 

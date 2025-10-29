@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, flash
+from flask import Flask, render_template, redirect, url_for, request, flash, jsonify
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from datetime import datetime
@@ -143,6 +143,14 @@ usuarios_cadastrados = [
 ]
 emails_enviados = []
 
+
+@app.route("/verificar_usuario")
+def verificar_usuario():
+    nome = request.args.get("nome", "").strip().lower()
+    existe = any(u["nome"].lower() == nome for u in usuarios_cadastrados)
+    return jsonify({"existe": existe})
+
+
 @app.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
     form = CadastroForm()
@@ -190,9 +198,11 @@ def cadastro():
         mensagem_extra=mensagem_extra
     )
 
+
 @app.route("/emailsEnviados")
 def emails_enviados_page():
     return render_template("emailsEnviados.html", emails=emails_enviados)
+
 
 # ---------- EXECUÇÃO ----------
 if __name__ == '__main__':
