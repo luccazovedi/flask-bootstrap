@@ -1,92 +1,159 @@
-# Flasky Bootstrap Project 🚀
+# Flasky (Flask + Bootstrap) 🚀
 
-[![Python](https://img.shields.io/badge/python-3.10-blue)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/flask-2.3.2-orange)](https://flask.palletsprojects.com/)
-[![Bootstrap](https://img.shields.io/badge/bootstrap-5.3-purple)](https://getbootstrap.com/)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+Aplicação Flask modular com Bootstrap, formulários com Flask-WTF e envio de e-mails via Mailgun/SendGrid.
+
+Principais recursos:
+- Página inicial com hora local dinâmica (Flask-Moment)
+- Rotas de usuário e identificação (`/user/<nome>`, `/user/<nome>/<institution>/<course>`)
+- Formulários com validação (`/forms`, `Flask-WTF`)
+- Login simples (`/login`)
+- Cadastro de usuários e listagem por função (`/listausuario`)
+- Cadastro com notificação por e-mail e histórico (`/cadastro`, `/emailsEnviados`)
+- Tratamento de erro 404 com template dedicado
+
+Compatível com execução local e deploy no PythonAnywhere.
+
 ---
 
-## 🔹 Sobre o Projeto
+## 📂 Estrutura do Projeto (modular)
 
-Aplicação web de exemplo utilizando **Flask**, **Bootstrap** e **Flask-Moment**
-
-Funcionalidades principais:
-- Página inicial com **hora local dinâmica** (`Flask-Moment`)
-- Página de usuário personalizada (`/user/<nome>`)
-- Página de identificação (`/user/<nome>/<ra>/<instituicao>`)
-- Página de formulário com validação (`Flask-WTF`)
-- Página de Login (`/login`)
-- Página de Cadastro de Usuário com Funções (`/listausuario`)
-- Página 404 personalizada para rotas inexistentes (`/404`)
-- Página de Cadastro e Lista de E-mail com envio automático (`/cadastro e /emailsEnviados`)
-- Layout responsivo com **Bootstrap**
-
-O projeto pode ser rodado **localmente** ou feito deploy no **PythonAnywhere**.
----
-
-## 📂 Estrutura do Projeto
-bootstrap/
-│── flaskbootstrap.py # Arquivo principal Flask
-
-│── static/ # Arquivos estáticos (favicon, CSS, JS, imagens)
-
-│── templates/ # Templates HTML
-
-│ ├── base.html # Template base com navbar e Bootstrap
-
-│ ├── index.html # Página inicial
-
-│ ├── user.html # Página personalizada do usuário
-
-│ ├── forms.html # Formulário
-
-│ ├── request.html # Informações da requisição
-
-│ └── 404.html # Página de erro 404
-
-│ └── login.hmtl # Login]
-
-│ └── cadastro.html #E-mail
-
-│ └── listausuario.html #Banco de Dados
-
-└── README.md
+```
+flasky/
+├─ app/
+│  ├─ templates/
+│  ├─ static/
+│  ├─ main/
+│  │  ├─ __init__.py
+│  │  ├─ errors.py
+│  │  ├─ forms.py
+│  │  └─ views.py
+│  ├─ __init__.py
+│  ├─ email.py
+│  └─ models.py
+├─ migrations/
+├─ tests/
+│  ├─ __init__.py
+│  └─ test_app.py
+├─ venv/           # placeholder (não versione um venv real)
+├─ requirements.txt
+├─ config.py
+└─ flasky.py       # cria a app via factory e roda em dev
+```
 
 ---
 
 ## ⚙️ Dependências
 
-- Flask
-- Flask-Bootstrap
-- Flask-WTF
-- Flask-Moment
+As principais dependências estão em `flasky/requirements.txt`:
+- Flask, Flask-Bootstrap, Flask-Moment, Flask-WTF, WTForms
+- python-dotenv (carrega `.env`)
+- requests (para Mailgun/SendGrid)
+- email-validator (validação do campo e-mail)
 
-Instalação recomendada via **virtualenv**:
+---
 
-```bash
-pip install flask flask-bootstrap flask-wtf flask-moment
+## 🚀 Rodando localmente (Windows PowerShell)
+
+No diretório do projeto:
+
+```powershell
+python -m venv .venv
+./.venv/Scripts/Activate.ps1
+python -m pip install -r .\flasky\requirements.txt
+
+# Variável de app para o Flask CLI
+$env:FLASK_APP = 'flasky.flasky'
+flask run
 ```
 
-## Rodando Localmente
+Acesse: http://127.0.0.1:5000
 
-Clone o projeto:
+---
 
-```bash
-git clone https://github.com/luccazovedi/flask-bootstrap.git
+## 🔐 Variáveis de ambiente (.env)
+
+Crie um arquivo `.env` na raiz do projeto (mesmo nível do `flask run`) com, por exemplo:
+
+```dotenv
+# Segurança
+SECRET_KEY=uma-chave-secreta-segura
+
+# Mailgun (Sandbox ou domínio próprio)
+MAILGUN_API_KEY=key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+MAILGUN_DOMAIN=sandboxXXXX.mailgun.org
+MAILGUN_FROM=Flasky <postmaster@sandboxXXXX.mailgun.org>
+
+# E-mail institucional para notificação
+INSTITUTIONAL_EMAIL=lucca.z@aluno.ifsp.edu.br
+
+# (Opcional) SendGrid
+# SENDGRID_API_KEY=...
+# SENDGRID_FROM=noreply@yourdomain.com
 ```
-```bash
-cd bootstrap
+
+Notas:
+- Para Mailgun Sandbox, cadastre os destinatários de teste como “Authorized Recipients”.
+- Não faça commit do `.env` (adicione ao `.gitignore`).
+
+---
+
+## ✉️ Envio de e-mails
+
+- O cadastro (`/cadastro`) envia e-mails para:
+  - Admin: `flaskaulasweb@zohomail.com`
+  - Institucional: `INSTITUTIONAL_EMAIL`
+  - E para o e-mail informado no formulário (se preenchido)
+- O corpo inclui: Prontuário (se informado), Nome e o usuário cadastrado.
+- A implementação tenta Mailgun; se não configurado, tenta SendGrid; caso nenhum esteja configurado, loga e segue.
+
+---
+
+## ✅ Testes
+
+Há um teste simples em `flasky/tests/test_app.py`.
+
+```powershell
+./.venv/Scripts/Activate.ps1
+python -m pip install pytest
+python -m pytest flasky/tests -q
 ```
 
-## Execute o app:
+---
 
-```
-python flaskbootstrap.py
-```
+## ☁️ Deploy no PythonAnywhere (resumo)
 
-Acesse: http://127.0.0.1:5000/
+1) Crie um Web app (Manual configuration) com a mesma versão do Python usada localmente.
+2) No console Bash do PythonAnywhere:
+	```bash
+	cd ~
+	git clone https://github.com/SEU_USUARIO/flask-bootstrap.git
+	python3.11 -m venv ~/virtualenvs/flaskbootstrap
+	source ~/virtualenvs/flaskbootstrap/bin/activate
+	pip install -r ~/flask-bootstrap/flasky/requirements.txt
+	```
+3) Em Web > WSGI configuration file, use algo como:
+	```python
+	import sys, os
+	project_home = '/home/SEU_USUARIO/flask-bootstrap'
+	if project_home not in sys.path:
+		 sys.path.insert(0, project_home)
+	os.chdir(project_home)
+	from flasky.flasky import app as application
+	```
+4) Em Web > Environment variables, configure as variáveis (SECRET_KEY, MAILGUN_*, INSTITUTIONAL_EMAIL...)
+5) Em Web > Virtualenv, aponte para `/home/SEU_USUARIO/virtualenvs/flaskbootstrap`
+6) Clique “Reload”.
 
-## Deploy:
+---
 
-O projeto também está disponível online em:
-https://zovedi.pythonanywhere.com
+## 🧠 Dicas
+
+- `.env` nunca deve ser comitado. Considere manter um `.env.example` com placeholders.
+- Para Mailgun Sandbox, autorize previamente todos os destinatários usados nos testes.
+- Se preferir, podemos adicionar uma rota de teste de e-mail apenas para desenvolvimento.
+
+---
+
+## 📎 Licença
+
+Uso educacional/demonstrativo. Adapte e inclua a licença de sua preferência (por exemplo, MIT) se for publicar.
