@@ -14,7 +14,7 @@ Principais recursos:
 Compatível com execução local e deploy no PythonAnywhere.
 
 ---
-
+ 
 ## 📂 Estrutura do Projeto (modular)
 
 ```
