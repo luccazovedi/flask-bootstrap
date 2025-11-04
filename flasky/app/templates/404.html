@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<div class="text-center">
+    <h1 class="text-danger">404 - Página não encontrada</h1>
+    <p>Ops! O endereço que você tentou acessar não existe.</p>
+    <a href="{{ url_for('index') }}" class="btn btn-link">Voltar para a Página Inicial</a>
+</div>
+{% endblock %}

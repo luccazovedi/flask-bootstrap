@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Resposta do Login{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1 class="mb-4">Login Bem-Sucedido!</h1>
+
+  <div class="alert alert-success">
+    <p><strong>Você está acessando o sistema por meio do usuário:</strong> {{ usuario }}</p>
+  </div>
+
+  <a href="{{ url_for('index') }}" class="btn btn-link">Voltar para a Página Inicial</a>
+</div>
+{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Resposta do Login{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1 class="mb-4">Login Bem-Sucedido!</h1>
+
+  <div class="alert alert-success">
+    <p><strong>Você está acessando o sistema por meio do usuário:</strong> {{ usuario }}</p>
+  </div>
+
+  <a href="{{ url_for('index') }}" class="btn btn-link">Voltar para a Página Inicial</a>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block page_content %}
+    <h1>Contexto da Requisição</h1>
+    <p>Olá, {{ name }}!</p>
+    <p>Método HTTP: {{ request.method }}</p>
+    <p>URL: {{ request.url }}</p>
+    <p>IP: {{ request.remote_addr }}</p>
+    <p>Navegador: {{ request.user_agent }}</p>
+    <a href="{{ url_for('index') }}" class="btn btn-link">Voltar para a Página Inicial</a>
+{% endblock %}

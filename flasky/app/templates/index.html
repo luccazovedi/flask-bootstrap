@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<div class="jumbotron text-center">
+    <h1>Servidor Web!</h1>
+    <p class="lead">Projeto Python - Flask </p>
+</div>
+
+<div class="text-center">
+    <p><strong>The local date and time is:</strong> {{ moment(current_time).format('LLLL') }}</p>
+    <p><strong>That was:</strong> {{ moment(current_time).fromNow(refresh=True) }}</p>
+</div>
+
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<div class="container">
+    <h1>Olá, {{ name }}!</h1>
+    <p>Essa é a sua página personalizada.</p>
+</div>
+<a href="{{ url_for('index') }}" class="btn btn-link">Voltar para a Página Inicial</a>
+{% endblock %}
