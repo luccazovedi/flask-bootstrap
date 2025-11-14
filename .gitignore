@@ -1,4 +1,12 @@
 .env
+.venv/
+data-dev.sqlite
+data.sqlite
+__pycache__/
+*.pyc
+.vscode/
+/.pytest_cache/
+/.mypy_cache/.env
 *.pyc
 __pycache__/
 instance/

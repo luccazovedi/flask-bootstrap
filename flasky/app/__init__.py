@@ -1,12 +1,17 @@
 from flask import Flask
-from dotenv import load_dotenv
-import os
 
-# Extensions are optional for import-time resilience. If packages are missing, we create
-# small shim objects with an init_app method so create_app can still be imported in
-# environments without all dependencies installed.
+# Optional dependency shim: if an extension isn't installed we provide a
+# lightweight object with an `init_app` method so the package can be
+# imported in minimal environments (useful for static analysis or tests
+# that don't require the full runtime stack).
 class _ShimExt:
     def init_app(self, app):
+        return None
+
+try:
+    from dotenv import load_dotenv
+except Exception:
+    def load_dotenv():
         return None
 
 try:
@@ -19,22 +24,53 @@ try:
 except Exception:
     Moment = _ShimExt
 
+try:
+    from flask_sqlalchemy import SQLAlchemy
+except Exception:
+    SQLAlchemy = _ShimExt
+
+try:
+    from flask_login import LoginManager
+except Exception:
+    LoginManager = _ShimExt
+
+try:
+    from flask_mail import Mail
+except Exception:
+    Mail = _ShimExt
+
+load_dotenv()
+
 bootstrap = Bootstrap()
 moment = Moment()
+db = SQLAlchemy()
+login_manager = LoginManager()
+try:
+    login_manager.login_view = 'auth.login'
+except Exception:
+    pass
+mail = Mail()
 
 
 def create_app(config_object=None):
     """Application factory."""
-    load_dotenv()
     app = Flask(__name__)
     app.config.from_object(config_object or 'flasky.config.Config')
 
+    # Initialize extensions
     bootstrap.init_app(app)
     moment.init_app(app)
+    db.init_app(app)
+    login_manager.init_app(app)
+    mail.init_app(app)
 
     # register the main blueprint
     from .main import bp as main_bp
     app.register_blueprint(main_bp)
+
+    # register auth blueprint (copied from aula.090)
+    from .auth import auth as auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/auth')
 
     # Create alias endpoints without blueprint prefix for compatibility with existing templates
     # We postpone aliasing until after blueprint registration
@@ -48,7 +84,7 @@ def create_app(config_object=None):
     # import the errors module so it can register handlers
     from .main import errors  # noqa: F401
 
-    # import models (placeholder)
+    # import models so they register with the app
     from . import models  # noqa: F401
 
     return app

@@ -6,3 +6,7 @@ python-dotenv
 requests
 WTForms
 email-validator
+Flask-Login
+Flask-SQLAlchemy
+Flask-Mail
+itsdangerous

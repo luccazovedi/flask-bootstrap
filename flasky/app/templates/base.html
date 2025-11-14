@@ -38,8 +38,21 @@
                 </li>
 
                 <li><a href="/forms">Formulário</a></li>
-                <li><a href="/login">Login</a></li>
-                <li><a href="/listausuario">Banco de Dados</a></li>
+
+                <!-- Account dropdown: groups login, register and reset password -->
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                        Conta <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="{{ url_for('auth.login') }}">Entrar</a></li>
+                        <li><a href="{{ url_for('auth.register') }}">Registrar</a></li>
+                        <li class="divider"></li>
+                        <li><a href="{{ url_for('auth.password_reset_request') }}">Recuperar senha</a></li>
+                    </ul>
+                </li>
+
+                <li><a href="/usuarios">Banco de Dados</a></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                         E-mail <span class="caret"></span>

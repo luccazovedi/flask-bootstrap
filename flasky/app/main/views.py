@@ -3,6 +3,11 @@ from datetime import datetime
 from . import bp
 from .forms import CadastroForm, NomeForm, LoginForm
 from ..email import send_email
+from .. import db
+from ..models import User
+from flask_login import login_user, login_required, current_user
+import secrets
+from flask import render_template
 
 # in-memory data stores (kept for compatibility with the original app)
 usuarios = [
@@ -56,7 +61,13 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         usuario = form.usuario.data
-        return redirect(url_for('loginResponse', usuario=usuario))
+        senha = form.senha.data
+        # try to find by email first, then username
+        user = User.query.filter((User.email == usuario) | (User.username == usuario)).first()
+        if user and user.verify_password(senha):
+            login_user(user)
+            return redirect(url_for('index'))
+        flash('Usuário ou senha inválidos', 'danger')
     return render_template('login.html', form=form)
 
 
@@ -99,6 +110,34 @@ def cadastro():
         funcao = 'User'
 
         usuarios_cadastrados.append({'nome': nome_usuario, 'funcao': funcao, 'prontuario': prontuario, 'email': endereco_email})
+
+        # If an email was provided, create a User in the local DB (if not exists)
+        created_user = None
+        if endereco_email:
+            existing = User.query.filter_by(email=endereco_email.lower()).first()
+            if not existing:
+                # generate a safe username from name; ensure uniqueness
+                base_username = ''.join(x for x in nome_usuario if x.isalnum())[:30] or endereco_email.split('@')[0]
+                username = base_username
+                i = 1
+                while User.query.filter_by(username=username).first() is not None:
+                    username = f"{base_username}{i}"
+                    i += 1
+
+                random_pw = secrets.token_urlsafe(8)
+                user = User(email=endereco_email.lower(), username=username, password=random_pw)
+                # mark unconfirmed so they can confirm via auth flow if desired
+                user.confirmed = False
+                db.session.add(user)
+                db.session.commit()
+                created_user = user
+
+                # send password-reset link so the user can set their password
+                try:
+                    token = user.generate_reset_token()
+                    send_email(user.email, 'Reset Your Password', 'auth/email/reset_password', user=user, token=token)
+                except Exception as e:
+                    print('Erro ao enviar e-mail de senha inicial:', e)
 
         # Recipients: always admin, institutional and optionally the provided email
         recipients = []
@@ -147,3 +186,38 @@ def cadastro():
 @bp.route('/emailsEnviados')
 def emails_enviados_page():
     return render_template('emailsEnviados.html', emails=emails_enviados)
+
+
+@bp.route('/usuarios')
+def usuarios_db():
+    # show persisted users from the database
+    users = User.query.order_by(User.id).all()
+    return render_template('usuarios.html', users=users)
+
+
+@bp.route('/usuarios/confirm/<int:user_id>', methods=['POST'])
+@login_required
+def confirm_user(user_id):
+    """Allow the configured admin to manually confirm a user account.
+
+    Only the address set in FLASKY_ADMIN may perform this action.
+    """
+    admin_email = current_app.config.get('FLASKY_ADMIN')
+    if not current_user.is_authenticated or current_user.email != admin_email:
+        flash('Ação não autorizada.', 'danger')
+        return redirect(url_for('main.usuarios_db'))
+
+    user = User.query.get(user_id)
+    if user is None:
+        flash('Usuário não encontrado.', 'warning')
+        return redirect(url_for('main.usuarios_db'))
+
+    if user.confirmed:
+        flash('Usuário já está confirmado.', 'info')
+        return redirect(url_for('main.usuarios_db'))
+
+    user.confirmed = True
+    db.session.add(user)
+    db.session.commit()
+    flash(f'Usuário {user.username} confirmado manualmente.', 'success')
+    return redirect(url_for('main.usuarios_db'))
