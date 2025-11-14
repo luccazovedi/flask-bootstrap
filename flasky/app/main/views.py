@@ -66,7 +66,7 @@ def login():
         user = User.query.filter((User.email == usuario) | (User.username == usuario)).first()
         if user and user.verify_password(senha):
             login_user(user)
-            return redirect(url_for('index'))
+            return redirect(url_for('main.index'))
         flash('Usuário ou senha inválidos', 'danger')
     return render_template('login.html', form=form)
 
@@ -135,9 +135,25 @@ def cadastro():
                 # send password-reset link so the user can set their password
                 try:
                     token = user.generate_reset_token()
-                    send_email(user.email, 'Reset Your Password', 'auth/email/reset_password', user=user, token=token)
+                    resp = send_email(user.email, 'Reset Your Password', 'auth/email/reset_password', user=user, token=token)
+                    # If send_email returns None or a falsey response, consider it a send failure
+                    if not resp:
+                        # mark as confirmed to avoid blocking the user when e-mail sending fails
+                        user.confirmed = True
+                        db.session.add(user)
+                        db.session.commit()
+                        print('Aviso: e-mail de senha não foi enviado; usuário confirmado automaticamente.', flush=True)
                 except Exception as e:
+                    # log the send failure and confirm the user to avoid blocking registration
                     print('Erro ao enviar e-mail de senha inicial:', e)
+                    try:
+                        user.confirmed = True
+                        db.session.add(user)
+                        db.session.commit()
+                        print('Usuário confirmado automaticamente após falha no envio de e-mail.', flush=True)
+                    except Exception as _:
+                        # if DB commit fails, at least log the original exception
+                        print('Falha ao confirmar usuário automaticamente após erro de e-mail.', flush=True)
 
         # Recipients: always admin, institutional and optionally the provided email
         recipients = []
@@ -152,7 +168,7 @@ def cadastro():
         if endereco_email:
             recipients.append(endereco_email)
 
-        assunto = f"[Flasky] Novo usuário cadastrado: {nome_usuario}"
+        assunto = f"Novo usuário cadastrado: {nome_usuario}"
         texto = (
             (f"Prontuário: {prontuario}\n" if prontuario else '') +
             f"Nome: {nome_usuario}\n" +
@@ -169,11 +185,21 @@ def cadastro():
         })
 
         # Try sending email via provider (Mailgun or SendGrid)
-        try:
-            send_email(recipients, assunto, texto)
-        except Exception as e:
-            # log send failure but don't break the request
-            print('Erro ao enviar e-mail:', e)
+        # Send to each recipient individually since send_email expects a single recipient
+        if created_user:
+            for recipient in recipients:
+                try:
+                    send_email(
+                        recipient,
+                        assunto,
+                        'mail/new_user',
+                        user=created_user,
+                        prontuario=prontuario,
+                        nome=nome_usuario
+                    )
+                except Exception as e:
+                    # log send failure but don't break the request
+                    print(f'Erro ao enviar e-mail para {recipient}:', e)
 
         flash('Cadastro realizado com sucesso!', 'success')
         form.prontuario.data = ''
@@ -191,25 +217,41 @@ def emails_enviados_page():
 @bp.route('/usuarios')
 def usuarios_db():
     # show persisted users from the database
-    users = User.query.order_by(User.id).all()
-    return render_template('usuarios.html', users=users)
+    try:
+        users = User.query.order_by(User.id).all()
+        # ensure we always pass a list to the template
+        users = users or []
+        empty = len(users) == 0
+    except Exception as e:
+        # Log the exception to the server logs and show a friendly message
+        print('Erro ao buscar usuários do banco:', e, flush=True)
+        flash('Erro ao acessar o banco de dados. Mostrando lista vazia.', 'warning')
+        users = []
+        empty = True
+
+    return render_template('usuarios.html', users=users, empty=empty)
 
 
-@bp.route('/usuarios/confirm/<int:user_id>', methods=['POST'])
+@bp.route('/usuarios/confirm/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def confirm_user(user_id):
-    """Allow the configured admin to manually confirm a user account.
+    # Handle accidental GETs by redirecting to the unconfirmed page
+    if request.method == 'GET':
+        return redirect(url_for('auth.unconfirmed'))
 
-    Only the address set in FLASKY_ADMIN may perform this action.
-    """
     admin_email = current_app.config.get('FLASKY_ADMIN')
-    if not current_user.is_authenticated or current_user.email != admin_email:
-        flash('Ação não autorizada.', 'danger')
-        return redirect(url_for('main.usuarios_db'))
+    # Permitir: admin ou o próprio usuário se quiser se auto-confirmar
+    if not current_user.is_authenticated:
+        flash('Faça login para confirmar.', 'warning')
+        return redirect(url_for('main.login'))
 
     user = User.query.get(user_id)
     if user is None:
         flash('Usuário não encontrado.', 'warning')
+        return redirect(url_for('main.usuarios_db'))
+
+    if current_user.email != admin_email and current_user.id != user.id:
+        flash('Ação não autorizada para este usuário.', 'danger')
         return redirect(url_for('main.usuarios_db'))
 
     if user.confirmed:

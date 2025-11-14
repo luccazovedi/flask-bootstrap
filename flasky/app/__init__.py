@@ -1,4 +1,5 @@
 from flask import Flask
+import os
 
 # Optional dependency shim: if an extension isn't installed we provide a
 # lightweight object with an `init_app` method so the package can be
@@ -56,6 +57,15 @@ def create_app(config_object=None):
     """Application factory."""
     app = Flask(__name__)
     app.config.from_object(config_object or 'flasky.config.Config')
+
+    # Ensure a SECRET_KEY exists so Flask-WTF CSRF can operate.
+    # In production set a strong secret via environment variable `SECRET_KEY`.
+    if not app.config.get('SECRET_KEY'):
+        # fallback to environment or a development default
+        app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-secret'
+        print('Warning: SECRET_KEY not set in config; using insecure development default.', flush=True)
+    # Ensure WTF_CSRF_SECRET_KEY is set (Flask-WTF uses it if present)
+    app.config.setdefault('WTF_CSRF_SECRET_KEY', app.config['SECRET_KEY'])
 
     # Initialize extensions
     bootstrap.init_app(app)

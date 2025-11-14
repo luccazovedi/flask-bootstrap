@@ -21,6 +21,14 @@
         </div>
 
         <div class="mb-3">
+            <label class="form-label" for="{{ form.prontuario.id }}">Prontuário (opcional)</label>
+            {{ form.prontuario(class="form-control", placeholder="SP1234567") }}
+            {% for error in form.prontuario.errors %}
+              <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
             <label class="form-label" for="{{ form.email.id }}">Qual é o seu email (Envio de notificação do novo usuário)?</label>
             {{ form.email(class="form-control", placeholder="seuemail@exemplo.com") }}
             {% for error in form.email.errors %}

@@ -14,9 +14,18 @@
         <th>Username</th>
         <th>Email</th>
         <th>Confirmado</th>
+        <th>Ações</th>
       </tr>
     </thead>
     <tbody>
+      {# show a helpful message above the table rows when empty #}
+      {% if empty %}
+      <tr>
+        <td colspan="5">
+          <div class="alert alert-info mb-0">Nenhum usuário cadastrado.</div>
+        </td>
+      </tr>
+      {% endif %}
       {% for u in users %}
       <tr>
         <td>{{ u.id }}</td>
@@ -32,13 +41,17 @@
         <td>
           {% if not u.confirmed %}
             <form method="post" action="{{ url_for('main.confirm_user', user_id=u.id) }}" style="display:inline">
+              {# include CSRF token in case CSRF protection is enabled #}
+              {% if csrf_token %}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              {% endif %}
               <button type="submit" class="btn btn-sm btn-primary">Confirmar manualmente</button>
             </form>
           {% endif %}
         </td>
       </tr>
       {% else %}
-      <tr><td colspan="4"><em>Nenhum usuário cadastrado</em></td></tr>
+      <tr><td colspan="5"><em>Nenhum usuário cadastrado</em></td></tr>
       {% endfor %}
     </tbody>
   </table>

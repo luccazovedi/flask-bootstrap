@@ -1,8 +1,5 @@
-from . import create_app
+from app import create_app
 
-
-# Use DevelopmentConfig by default so a local SQLite DB URI is available
-# when running the module directly.
 app = create_app('flasky.config.DevelopmentConfig')
 
 

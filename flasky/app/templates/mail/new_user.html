@@ -1,1 +1,8 @@
-User <b>{{ user.username }}</b> has joined.
+<p><strong>Novo usuário cadastrado no Flasky</strong></p>
+
+<p><b>Nome:</b> {{ nome }}</p>
+{% if prontuario %}
+<p><b>Prontuário:</b> {{ prontuario }}</p>
+{% endif %}
+<p><b>Username:</b> {{ user.username }}</p>
+<p><b>Email:</b> {{ user.email }}</p>
