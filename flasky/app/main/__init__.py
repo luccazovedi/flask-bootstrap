@@ -1,5 +1,0 @@
-from flask import Blueprint
-
-bp = Blueprint('main', __name__)
-
-from . import views, errors, forms  # noqa: F401

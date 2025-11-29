@@ -54,7 +54,10 @@ mail = Mail()
 
 
 def create_app(config_object=None):
-    """Application factory."""
+    """Application factory (simplified).
+
+    Only initializes what is needed for the index and disciplina routes.
+    """
     app = Flask(__name__)
     app.config.from_object(config_object or 'flasky.config.Config')
 
@@ -67,34 +70,57 @@ def create_app(config_object=None):
     # Ensure WTF_CSRF_SECRET_KEY is set (Flask-WTF uses it if present)
     app.config.setdefault('WTF_CSRF_SECRET_KEY', app.config['SECRET_KEY'])
 
-    # Initialize extensions
-    bootstrap.init_app(app)
+    # Initialize only the extensions we need for the two pages
+    try:
+        bootstrap.init_app(app)
+    except Exception:
+        pass
     moment.init_app(app)
     db.init_app(app)
-    login_manager.init_app(app)
-    mail.init_app(app)
 
-    # register the main blueprint
-    from .main import bp as main_bp
-    app.register_blueprint(main_bp)
+    # simple routes: index (uses moment) and disciplina
+    from flask import render_template
+    from datetime import datetime
 
-    # register auth blueprint (copied from aula.090)
-    from .auth import auth as auth_bp
-    app.register_blueprint(auth_bp, url_prefix='/auth')
+    @app.route('/')
+    def index():
+        return render_template('index.html', current_time=datetime.utcnow())
 
-    # Create alias endpoints without blueprint prefix for compatibility with existing templates
-    # We postpone aliasing until after blueprint registration
-    for rule in list(app.url_map.iter_rules()):
-        if rule.endpoint.startswith(f"{main_bp.name}."):
-            short_endpoint = rule.endpoint.split('.', 1)[1]
-            view_func = app.view_functions.get(rule.endpoint)
-            if short_endpoint not in app.view_functions:
-                app.add_url_rule(rule.rule, endpoint=short_endpoint, view_func=view_func, methods=rule.methods)
+    from flask import request, redirect, url_for, flash
+    from .models import Discipline
 
-    # import the errors module so it can register handlers
-    from .main import errors  # noqa: F401
+    @app.route('/disciplina', methods=['GET', 'POST'])
+    def disciplina():
+        if request.method == 'POST':
+            name = request.form.get('name', '').strip()
+            semester = request.form.get('semester', '').strip()
+            # basic validation
+            if not name or not semester:
+                flash('Por favor informe o nome da disciplina e selecione o semestre.', 'danger')
+                return redirect(url_for('disciplina'))
+            try:
+                sem_int = int(semester)
+            except ValueError:
+                sem_int = None
+            if sem_int is None or sem_int < 1 or sem_int > 6:
+                flash('Semestre inválido. Escolha um valor entre 1 e 6.', 'danger')
+                return redirect(url_for('disciplina'))
 
-    # import models so they register with the app
-    from . import models  # noqa: F401
+            # save to database
+            disc = Discipline(name=name, semester=sem_int)
+            try:
+                db.session.add(disc)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                flash('Erro ao salvar no banco de dados.', 'danger')
+                return redirect(url_for('disciplina'))
+
+            flash(f'Disciplina "{name}" cadastrada no semestre {sem_int}.', 'success')
+            return redirect(url_for('disciplina'))
+
+        # query persisted disciplines
+        disciplines = Discipline.query.order_by(Discipline.id.desc()).all()
+        return render_template('disciplina.html', disciplines=disciplines)
 
     return app
