@@ -1,6 +1,6 @@
 {% extends "bootstrap/base.html" %}
 
-{% block title %}Formulários Web{% endblock %}
+{% block title %}Avaliação Semestral{% endblock %}
 
 {% block head %}
 {{ super() }}
@@ -18,16 +18,15 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">Desenvolvimento Web: Servidor - Avaliação Semestral</a>
+            <a class="navbar-brand" href="{{ url_for('index') }}">Avaliação Semestral</a>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="/">Início</a></li>
-                <li><a href="/">Cadastro de Professores</a></li>
-                <li><a href="/">Cadastro de Disciplinas</a></li>
-                <li><a href="/">Cadastro de Alunos</a></li>
-                <li><a href="/">Cadastro de Cursos</a></li>
-                <li><a href="/">Cadastro de Ocorrências</a></li>
+                <li><a href="{{ url_for('index') }}">Cadastro de Professores</a></li>
+                <li><a href="{{ url_for('disciplina') }}">Cadastro de Disciplinas</a></li>
+                <li><a href="{{ url_for('index') }}">Cadastro de Alunos</a></li>
+                <li><a href="{{ url_for('index') }}">Cadastro de Cursos</a></li>
+                <li><a href="{{ url_for('index') }}">Cadastro de Ocorrências</a></li>
             </ul>
         </div>
     </div>

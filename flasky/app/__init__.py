@@ -123,4 +123,9 @@ def create_app(config_object=None):
         disciplines = Discipline.query.order_by(Discipline.id.desc()).all()
         return render_template('disciplina.html', disciplines=disciplines)
 
+    @app.errorhandler(404)
+    def page_not_found(e):
+        from flask import render_template
+        return render_template('404.html'), 404
+
     return app
