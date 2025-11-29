@@ -169,6 +169,7 @@ Se algo falhar:
 ---
 
 ## Licença
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/6b39e06e-9860-4252-a090-9b950336a8a0" />
 
 Uso educacional / demonstrativo.
 
