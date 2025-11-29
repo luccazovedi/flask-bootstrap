@@ -86,17 +86,22 @@ def create_app(config_object=None):
     def index():
         return render_template('index.html', current_time=datetime.utcnow())
 
-    from flask import request, redirect, url_for, flash
+    from flask import request, redirect, url_for, flash, abort
     from .models import Discipline
 
     @app.route('/disciplina', methods=['GET', 'POST'])
     def disciplina():
         if request.method == 'POST':
             name = request.form.get('name', '').strip()
-            semester = request.form.get('semester', '').strip()
-            # basic validation
+            # suporta checkbox (vários) mas exige exatamente 1 seleção
+            sem_list = request.form.getlist('semester')
+            semester = (sem_list[0].strip() if sem_list else '').strip()
             if not name or not semester:
                 flash('Por favor informe o nome da disciplina e selecione o semestre.', 'danger')
+                return redirect(url_for('disciplina'))
+            # se mais de um checkbox marcado
+            if len(sem_list) > 1:
+                flash('Selecione apenas um semestre.', 'danger')
                 return redirect(url_for('disciplina'))
             try:
                 sem_int = int(semester)
@@ -106,7 +111,6 @@ def create_app(config_object=None):
                 flash('Semestre inválido. Escolha um valor entre 1 e 6.', 'danger')
                 return redirect(url_for('disciplina'))
 
-            # save to database
             disc = Discipline(name=name, semester=sem_int)
             try:
                 db.session.add(disc)
@@ -119,13 +123,28 @@ def create_app(config_object=None):
             flash(f'Disciplina "{name}" cadastrada no semestre {sem_int}.', 'success')
             return redirect(url_for('disciplina'))
 
-        # query persisted disciplines
         disciplines = Discipline.query.order_by(Discipline.id.desc()).all()
         return render_template('disciplina.html', disciplines=disciplines)
 
+    # Rotas não implementadas do menu: entregam diretamente o template 404
+    @app.route('/professores')
+    def professores():
+        return render_template('professores.html'), 404
+
+    @app.route('/alunos')
+    def alunos():
+        return render_template('alunos.html'), 404
+
+    @app.route('/cursos')
+    def cursos():
+        return render_template('cursos.html'), 404
+
+    @app.route('/ocorrencias')
+    def ocorrencias():
+        return render_template('ocorrencias.html'), 404
+
     @app.errorhandler(404)
     def page_not_found(e):
-        from flask import render_template
         return render_template('404.html'), 404
 
     return app
